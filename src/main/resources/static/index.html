@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>RequestBoard</title>
+	<style>
+		table {
+			margin-bottom: 20px;
+			border: 1px solid #dddddd;
+			border-collapse: collapse;
+		}
+		table thead {
+			font-weight: bold;
+			padding: 5px;
+			background: #efefef;
+			border: 1px solid #dddddd;
+			text-align: center;
+		}
+		table td {
+			border: 1px solid #dddddd;
+			padding: 5px;
+		}
+	</style>
+</head>
+<body>
+<table id="logDesc">
+	<thead></thead>
+	<tbody></tbody>
+</table>
+
+<script lang="JavaScript">
+	var execAndDraw = function execAndDraw(tableID){
+		var request = new XMLHttpRequest();
+		request.open('GET', "/fakeinvoke/log", true);
+		request.responseType =	"json";
+		request.addEventListener("readystatechange", () => {
+			{
+				if (request.readyState === 4 && request.status === 200) {
+					var result = request.response;
+					drawTable(tableID, result);
+				}
+			}
+		});
+		request.send();
+	};
+
+	var drawTable = function drawTable(tableID, itemsArray){
+		let newTbody = document.createElement('tbody');
+		let rows = itemsArray;
+		//fill table headers
+		let newThead = document.createElement('thead');
+		if (rows.length>0) {
+			let newRow = newThead.insertRow(-1);
+			let headerExample = rows[0];
+			for (key in headerExample) {
+				let idCell = newRow.insertCell(-1);
+				idCell.appendChild(document.createTextNode(key));
+			}
+		}
+		//fill table data
+		for(let i=0; i<rows.length; i++){
+			let newRow = newTbody.insertRow(-1);
+			let item = rows[i];
+			for (key in item) {
+				let idCell = newRow.insertCell(-1);
+				idCell.appendChild(document.createTextNode(item[key]));
+			}
+		}
+		let tableRef = document.getElementById(tableID);
+		let oldThead = tableRef.getElementsByTagName('thead')[0];
+		oldThead.parentNode.replaceChild(newThead, oldThead);
+		let oldTbody = tableRef.getElementsByTagName('tbody')[0];
+		oldTbody.parentNode.replaceChild(newTbody, oldTbody);
+	};
+
+	/*Start*/
+	(function (){
+		setInterval(() => execAndDraw("logDesc"), 2000);
+	}());
+
+</script>
+</body>
+</html>
